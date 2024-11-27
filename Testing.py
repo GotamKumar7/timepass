@@ -1,80 +1,47 @@
-import streamlit as st
-import pyttsx3
-import tempfile
-import os
+def task():
+    tasks = []  # Initialize an empty list to store tasks
+    print("----WELCOME TO THE TASK MANAGEMENT APP----")
+    total_task = int(input("Enter how many tasks you want to add = "))
+    for i in range(1, total_task + 1):
+        task_name = input(f"Enter task {i} = ")
+        tasks.append(task_name)
+    print(f"Today's tasks are\n{tasks}")
+    
+    while True:
+        try:
+            operation = int(input("Enter \n1-Add\n2-Update\n3-Delete\n4-View\n5-Exit/Stop\n"))
+            if operation == 1:
+                add = input("Enter task you want to add = ")
+                tasks.append(add)
+                print(f"Task '{add}' has been successfully added.")
+            elif operation == 2:
+                updated_val = input("Enter the task name you want to update = ")
+                if updated_val in tasks:
+                    up = input("Enter new task = ")
+                    ind = tasks.index(updated_val)
+                    tasks[ind] = up
+                    print(f"Updated task '{updated_val}' to '{up}'.")
+                else:
+                    print("Task not found.")
+            elif operation == 3:
+                del_val = input("Which task you want to delete = ")
+                if del_val in tasks:
+                    ind = tasks.index(del_val)
+                    del tasks[ind]
+                    print(f"Task '{del_val}' has been deleted.")
+                else:
+                    print("Task not found.")
+            elif operation == 4:
+                print(f"Total tasks = {tasks}")
+            elif operation == 5:
+                print("Closing the program....")
+                break
+            else:
+                print("Invalid Input. Please enter a number from 1 to 5.")
+        except ValueError:
+            print("Invalid Input. Please enter a valid number.")
 
-# Set up the Streamlit app
-st.set_page_config(
-    page_title="Realistic Text-to-Speech App",
-    page_icon="🔊",
-    layout="centered",
-)
+task()
 
-# Header
-st.title("🔊 Realistic Text-to-Speech App")
-st.write("Convert your text into speech with customizable voice settings!")
 
-# Sidebar for settings
-st.sidebar.header("🎛️ Voice Settings")
 
-# Initialize pyttsx3 engine
-engine = pyttsx3.init()
-
-# Voice rate setting
-rate = st.sidebar.slider("Speech Rate (Words per Minute)", min_value=100, max_value=300, value=150, step=10)
-engine.setProperty('rate', rate)
-
-# Volume setting
-volume = st.sidebar.slider("Volume", min_value=0.0, max_value=1.0, value=0.9, step=0.1)
-engine.setProperty('volume', volume)
-
-# Voice selection
-voices = engine.getProperty('voices')
-voice_names = [voice.name for voice in voices]
-selected_voice = st.sidebar.selectbox("Choose a Voice", options=voice_names)
-# Set the selected voice
-for voice in voices:
-    if voice.name == selected_voice:
-        engine.setProperty('voice', voice.id)
-        break
-
-# Main input area
-text = st.text_area("Enter your text here:", placeholder="Type something...")
-
-if st.button("🔊 Convert to Speech"):
-    if text.strip():
-        # Convert text to speech
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as temp_audio:
-            temp_filename = temp_audio.name
-            engine.save_to_file(text, temp_filename)
-            engine.runAndWait()
-        
-        # Success message
-        st.success("Speech conversion successful! 🎉")
-        
-        # Audio playback
-        audio_file = open(temp_filename, "rb")
-        audio_bytes = audio_file.read()
-        st.audio(audio_bytes, format="audio/mp3")
-        
-        # Download link
-        st.download_button(
-            label="⬇️ Download Audio",
-            data=audio_bytes,
-            file_name="speech_output.mp3",
-            mime="audio/mp3"
-        )
-        
-        # Clean up
-        audio_file.close()
-        os.remove(temp_filename)
-    else:
-        st.error("Please enter some text to convert!")
-
-# Footer
-st.markdown(
-    """
-    ---
-    Made with ❤️ using Streamlit and pyttsx3
-    """
-)
